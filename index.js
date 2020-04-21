@@ -8,7 +8,5 @@ const portNumber = 4000;
 const config = require("config");
 
 //Connecting to Beskleta DataBase ;
-
-app.listen(portNumber, () =>
-  console.log(`listening to port #${portNumber || process.env.PORT}`)
-);
+const port = process.env.PORT || 8000;
+app.listen(portNumber, () => console.log(`listening to port #${port}`));

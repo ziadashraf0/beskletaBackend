@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: true }));
 var url =
-  "mongodb://<ziad>:<zozforzoz1>@ds361085.mlab.com:61085/heroku_x8h0zwnq";
+  "mongodb://<heroku_x8h0zwnq>:<beskletab1>@ds361085.mlab.com:61085/heroku_x8h0zwnq";
 //Connecting to Beskleta DataBase ;
 mongoose
   .connect(url, {

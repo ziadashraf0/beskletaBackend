@@ -9,4 +9,6 @@ const config = require("config");
 
 //Connecting to Beskleta DataBase ;
 
-app.listen(portNumber, () => console.log(`listening to port #${portNumber}`));
+app.listen(portNumber, () =>
+  console.log(`listening to port #${portNumber || process.env.PORT}`)
+);

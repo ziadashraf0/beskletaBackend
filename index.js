@@ -17,7 +17,8 @@ app.use(cors());
 app.use(express.json());
 app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: true }));
-var url = process.env.MONGODB_URI || "mongodb://localhost/Beskleta";
+var url =
+  "mongodb://<ziad>:<zozforzoz1>@ds361085.mlab.com:61085/heroku_x8h0zwnq";
 //Connecting to Beskleta DataBase ;
 mongoose
   .connect(url, {

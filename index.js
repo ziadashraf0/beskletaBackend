@@ -19,35 +19,23 @@ app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: true }));
 
 //Connecting to Beskleta DataBase ;
-mongoose.connect(
-  "mongodb://ziad:zozforzoz1@ds361085.mlab.com:61085/heroku_x8h0zwnq",
-  { useNewUrlParser: true },
-  function(err) {
-    {
-      if (err) {
-        console.log("Some problem with the connection " + err);
-      } else {
-        console.log("The Mongoose connection is ready");
-      }
+
+mongoose
+  .connect("mongodb://localhost/Beskleta", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true
+  })
+  .then(
+    () => {
+      /** ready to use. The `mongoose.connect()` promise resolves to mongoose instance. */
+      console.log("DATABASE Created !");
+    },
+    err => {
+      /** handle initial connection error */
+      console.error(err);
     }
-  }
-);
-// mongoose
-//   .connect(url, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//     useCreateIndex: true
-//   })
-//   .then(
-//     () => {
-//       /** ready to use. The `mongoose.connect()` promise resolves to mongoose instance. */
-//       console.log("DATABASE Created !");
-//     },
-//     err => {
-//       /** handle initial connection error */
-//       console.error(err);
-//     }
-//   );
+  );
 app.use("/bike", Bike);
 app.use("/owner", Owner);
 app.use("/admin", Admin);

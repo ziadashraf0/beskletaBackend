@@ -17,11 +17,10 @@ app.use(cors());
 app.use(express.json());
 app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: true }));
-var url =
-  "mongodb://<heroku_x8h0zwnq>:<beskletab1>@ds361085.mlab.com:61085/heroku_x8h0zwnq";
+
 //Connecting to Beskleta DataBase ;
 mongoose.connect(
-  "mongodb://heroku_x8h0zwnq:beskletab1@ds361085.mlab.com:61085/heroku_x8h0zwnq",
+  "mongodb://ziad:zozforzoz1@ds361085.mlab.com:61085/heroku_x8h0zwnq",
   { useNewUrlParser: true },
   function(err) {
     {

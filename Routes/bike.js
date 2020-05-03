@@ -41,6 +41,16 @@ router.post('/addBike',async (req,res)=>{
 
 
 });
+router.post('/viewBike',async (req,res)=>{
+
+    if(!req.body._id) return res.status(400).send("Bad Request");
+
+    const bike= await Bike.findOne({_id:req.body._id});
+    if(!bike) return res.status(404).send("Bike was not found");
+
+    return res.status(200).send(bike);
+
+});
 
 
 

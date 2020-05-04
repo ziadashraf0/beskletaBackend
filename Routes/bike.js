@@ -53,7 +53,21 @@ router.post('/viewBike',async (req,res)=>{
 });
 
 
+router.post('/viewStationBikes',async (req,res)=>{
 
+    if(!req.body.stationName) return res.status(400).send("Bad Request");
+
+    const bikes= await Bike.find({stationName:req.body.stationName});
+    if(bikes.length<1) return res.status(404).send("No bikes were found");
+
+    return res.status(200).send(bikes);
+
+
+    
+
+
+
+});
 
 
 

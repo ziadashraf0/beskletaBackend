@@ -5,7 +5,8 @@ module.exports = function() {
     .connect(config.get("db"), {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useCreateIndex: true
+      useCreateIndex: true,
+      useFindAndModify:false
     })
     .then(
       () => {

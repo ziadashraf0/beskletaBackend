@@ -109,7 +109,7 @@ if(clientAge<allowedAge)
     birthDate: req.body.birthDate,
     userName: req.body.userName,
     dependents:[],
-    rides:[],
+    //rides:[],
     activated:false,
     isDependent:IsDependent,
     state:'Available',
@@ -396,15 +396,14 @@ router.post('/requestRide',async (req,res)=>{
               await Client.updateOne({_id:client._id},{$set:{state:'Not Available'}});
 
               await Station.updateOne({name:req.body.stationName},{$inc:{numberBikes:-1}});
-              await Bike.updateOne({_id:bike._id},{$set:{stationName:'riding'}});
+              await Bike.updateOne({_id:bike._id},{$set:{PIN:randomPIN}});
 
               const ride = new Ride({
                 bikeID:bike._id,
-                departureStation:req.body.stationName
-            
+                departureStation:req.body.stationName,
+                clientUserName:req.body.userName
             });
-            await Client.updateOne({_id:client._id},{$push:{rides:ride}});
-
+            await ride.save();
               
                                 return res.send("OK");
         }catch(error){
@@ -422,6 +421,33 @@ router.post('/viewNotifications',async(req,res)=>{
   if(!client) return res.status(404).send("Client was not found");
 
   return res.status(200).send(client.Notifications);
+
+});
+router.post('/viewRides',async (req,res)=>{
+    if(!req.body.userName)   return res.status(400).send("BAD REQUEST");
+    const clientRides=await Ride.find({clientUserName:req.body.userName});
+    if(clientRides.length===0) return res.status(404).send("No rides were found");
+  
+    return res.status(200).send(clientRides);
+
+});
+router.post('/startRide',async(req,res)=>{
+
+    if(!req.body.userName || !req.body.PIN) return res.status(400).send("BAD REQUEST");
+    const ride= await Ride.findOne({clientUserName:req.body.userName,hasStarted:false});
+    if(!ride) return res.status(404).send("Ride was not found");
+    const currentDate=new Date();
+    const bike=await Bike.findOne({_id:ride.bikeID});
+  if(!bike ) return res.status(400).send("Bike was not found");
+  if(bike.locked===false) return res.status(400).send("Bike was unLocked");
+  if(req.body.PIN!==bike.PIN) return res.status(400).send("The PIN you entered is INCORRECT");
+
+  
+     await Ride.findOneAndUpdate({_id:ride._id},{$set:{hasStarted:true,date:currentDate}});  //set ride to be started AND update the starting date
+     await Bike.findOneAndUpdate({_id:ride.bikeID},{$set:{stationName:"Riding",locked:false}});     // updating the bike's current station 
+     return res.status(200).send("Let's GO");
+    
+  
 
 });
 module.exports = router;

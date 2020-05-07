@@ -12,7 +12,14 @@ const RideSchema = new mongoose.Schema({
     },
     arrivalStation: String,
     departureStation: String,
-    numberOfHours: Number
+    numberOfHours: Number,
+    clientUserName:String,
+    isTerminated:{
+      type:Boolean,
+      default:false},
+    hasStarted:{
+        type:Boolean,
+        default:false}
 });
 autoIncrement.initialize(mongoose);
 RideSchema.plugin(autoIncrement.plugin, { model: 'RideSchema', field: 'rideNumber' });

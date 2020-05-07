@@ -12,7 +12,12 @@ const BikeSchema = new mongoose.Schema({
     condition: String,
     rate: Number,           //decimal
     ownerSSN:String 
-     ,stationName: String
+     ,stationName: String,
+     PIN:String,
+     locked:{
+                type:Boolean,
+                default:true
+                    }
 });
 autoIncrement.initialize(mongoose);
 BikeSchema.plugin(autoIncrement.plugin, 'Bike');

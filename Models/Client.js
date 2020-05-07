@@ -30,7 +30,7 @@ const ClientSchema = new mongoose.Schema({
     type: String
   },
   dependents: [ Number ],
-  rides: [],
+  //rides: [],
   state: {
     type:String,
     enum:['Available','Not Available']},

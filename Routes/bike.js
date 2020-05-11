@@ -68,6 +68,18 @@ router.post('/viewStationBikes',async (req,res)=>{
 
 
 });
+router.post("/RemoveBike",async (req,res)=>{
+        if(!req.body.bikeID || !req.body.ownerSSN)     return res.status(400).send("Bad Request");
+        const bike= await Bike.findOne({_id:req.body.bikeID,ownerSSN:req.body.ownerSSN});
+        
+        // if the bike was not found
+        if(!bike) return  res.status(404).send("No such bike was not found with given Owner SSN and bike ID");
+
+        if(bike.state==="Not Available") return  res.status(400).send("The bike is not available at the moment, Please come back later");
+
+        const deletedBike=await Bike.findByIdAndDelete({_id:bike._id});
+        return res.status(200).send(deletedBike);
+});
 
 
 

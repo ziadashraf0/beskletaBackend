@@ -113,21 +113,15 @@ router.post('/signup', async (req,res) => {
    
 });
 
-router.get('/viewProfile', async (req,res)=>{
+router.post('/viewProfile', async (req,res)=>{
   
   console.log(req.body)  
-  if(!req.body.SSN)
-  {
-    return res.status(400).send("Bad Request")
-    
-  }
-  const owner = await Owner.find( { SSN: req.body.SSN }).select({password:0});
-  if(owner.length<1)
-  {
-    return res.status(404).send("Owner was not found");
-    
-  }
-  return res.status(200).send(owner[0]);
+  if(!req.body.userName)  return res.status(400).send("Bad Request")
+
+  const owner = await Owner.findOne( { userName: req.body.userName }).select({password:0});
+  if(!owner)  return res.status(404).send("Owner was not found");
+  
+  return res.status(200).send(owner);
 
 });
 router.put('/editEmail',async (req,res)=>{

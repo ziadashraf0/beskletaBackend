@@ -425,7 +425,7 @@ router.post('/viewNotifications',async(req,res)=>{
 });
 router.post('/viewRides',async (req,res)=>{
     if(!req.body.userName)   return res.status(400).send("BAD REQUEST");
-    const clientRides=await Ride.find({clientUserName:req.body.userName});
+    const clientRides=await Ride.find({clientUserName:req.body.userName,isTerminated:true});
     if(clientRides.length===0) return res.status(404).send("No rides were found");
   
     return res.status(200).send(clientRides);

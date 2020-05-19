@@ -10,6 +10,7 @@ const Station = require("../Models/Station");
 const Ride = require("../Models/Ride");
 const Notification = require("../Models/Notification");
 const date = require('date-and-time');
+var moment = require("moment");
 const allowedAge =21;
 router.post("/IDsearch", async (req, res) => {
   console.log(req.body);
@@ -450,4 +451,92 @@ router.post('/startRide',async(req,res)=>{
   
 
 });
+router.put('/selectDestinationStation',async(req,res)=>{
+
+  if(!req.body.userName || !req.body.destinationStationName ) return res.status(400).send("BAD REQUEST");
+const currentRide= await Ride.findOne({clientUserName:req.body.userName,hasStarted:true,isTerminated:false});   //search for the client's current ride
+if(!currentRide) return res.status(404).send('Your current ride was not found');  
+const destinationStation =await Station.findOne({name:req.body.destinationStationName});   //search for the selected destination station
+if(!destinationStation) return res.status(404).send('Wrong station Name');
+
+if(destinationStation.numberBikes>= destinationStation.maxAllowedCapacity)
+  return res.status(400).send("The selected Station has no empty slots,Please select another station");
+  try {
+    await Station.findOneAndUpdate({_id:destinationStation._id},{$inc:{numberBikes:1}});  //Incrementing station's number of bikes by 1
+    await Ride.findOneAndUpdate({_id:currentRide._id},{$set:{arrivalStation:req.body.destinationStationName}});  //Updates ride's arrival station
+  return res.status(200).send("OK");
+  } catch (error) {
+    return res.status(400).send("Error");
+
+  }
+  
+
+
+});
+router.put('/terminateRide',async(req,res)=>{
+if(!req.body.userName) return res.status(400).send("BAD REQUEST");
+const currentRide =await Ride.findOne({clientUserName:req.body.userName,isTerminated:false,hasStarted:true}); //finding current ride
+
+if(!currentRide) return res.status(404).send("Your current ride was not found");
+const bike=await Bike.findOne({_id:currentRide.bikeID});        //finding bike
+if(!bike) return res.status(404).send("bike was not found");
+const client =await Client.findOne({userName:req.body.userName});     //finding client
+if(!client) return res.status(404).send("Client was not found");
+var bankAccountNumber;
+if(client.isDependent){
+  const parent=await Client.findOne({_id:client.parentID});
+  if(!parent)  return res.status(404).send("Parent was not found");
+   bankAccountNumber=parent.bankAccountNumber;
+}
+else{
+  bankAccountNumber=client.bankAccountNumber;
+}
+
+const rideDuration=calculateDuration(currentRide.date,new Date()).toFixed(2);    //calculating ride's duration
+const rideCost=(rideDuration*bike.rate/60).toFixed(2);                          //calculating ride's price
+console.log(bankAccountNumber)
+try {
+  await Ride.findOneAndUpdate({_id:currentRide._id},{$set:{duration:rideDuration,isTerminated:true,price:rideCost}});  //Updates ride's duration
+  await Bike.findOneAndUpdate({_id:currentRide.bikeID},{$inc:{numberOfRides:1}});  //Updates ride's arrival station
+  await Bike.findOneAndUpdate({_id:currentRide.bikeID},{$set:{stationName:currentRide.arrivalStation,state:"Available",locked:true,PIN:'XXXX'}});  //Updates ride's arrival station
+//Balance Transfer
+  await Bank.findOneAndUpdate({bankAccountNumber:bankAccountNumber},{$inc:{balance:rideCost*-1}});  //withdraw ride's cost from the client's bankAccount
+  await Client.findOneAndUpdate({_id:client._id},{$set:{state:'Available'}});  //Updates ride's arrival station
+  await Station.findOneAndUpdate({name:currentRide.departureStation},{$inc:{numberRides:1}});  //Updates ride's arrival station
+
+
+                const notification = new Notification({
+                  type:"Ride Terminated",
+                  viewed:false,
+                  message:"This is the end of your ride. Price: "+rideCost
+              
+              });
+  
+                    
+              await Client.updateOne({_id:client._id},{$push:{Notifications:notification}});
+
+return res.status(200).send("OK");
+
+} catch (error) {
+  console.log(error)
+  return res.status(400).send("Error");
+
+}
+
+
+
+
+
+
+});
+
 module.exports = router;
+function calculateDuration(startDate,endDate)
+{
+  
+   var start_date = moment(startDate, 'YYYY-MM-DD HH:mm:ss');
+   var end_date = moment(endDate, 'YYYY-MM-DD HH:mm:ss');
+   var duration = moment.duration(end_date.diff(start_date));
+   var minutes = duration.asMinutes();       
+   return minutes;
+}

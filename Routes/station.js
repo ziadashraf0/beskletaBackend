@@ -29,8 +29,8 @@ router.post('/addStation',async (req,res)=>{
                 latitude:parseFloat(req.body.latitude),
                 maxCapacity:parseInt(req.body.maxCapacity),
                 numberBikes:parseInt(req.body.numberBikes),
-                numberRides:0       //Default value
-
+                numberRides:0,       //Default value
+                maxAllowedCapacity:parseInt(req.body.maxCapacity)+5
 
     });
 

@@ -17,7 +17,11 @@ const BikeSchema = new mongoose.Schema({
      locked:{
                 type:Boolean,
                 default:true
-                    }
+     },
+     numberOfRides:{
+                type:Number,
+                default:0
+     }
 });
 autoIncrement.initialize(mongoose);
 BikeSchema.plugin(autoIncrement.plugin, 'Bike');

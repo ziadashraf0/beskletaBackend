@@ -13,7 +13,7 @@ const BankSchema = new mongoose.Schema({
     },
     cardVerificationCode:String,
     name: String,
-    Balance: mongoose.Decimal128,
+    balance: mongoose.Decimal128,
     cardValidityDate: Date,
     PIN: String,
     cardNumber: String,

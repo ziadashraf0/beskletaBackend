@@ -17,7 +17,8 @@ const StationSchema = new mongoose.Schema({
        },
     maxCapacity: Number,
     numberBikes :Number,
-	numberRides:Number
+    numberRides:Number,
+    maxAllowedCapacity:Number    // Should be more than the maxCapacit by 5 slots.
 
 });
 module.exports = mongoose.model('Station', StationSchema);

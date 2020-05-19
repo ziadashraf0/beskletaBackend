@@ -491,6 +491,21 @@ if(client.isDependent){
 else{
   bankAccountNumber=client.bankAccountNumber;
 }
+const beskletaBankAccount= await Bank.findOne({name:"Beskleta"});
+if(!beskletaBankAccount){
+  const now = new Date();
+  const validityDate = date.addYears(now, 3);
+  const newBankAccount = new Bank({
+      email:"owner@Beskleta.com",
+      password:"1234",
+      PIN:"1234",
+      name:"Beskleta",
+      balance:parseFloat(1000000),
+      cardValidityDate:validityDate
+  });
+  await newBankAccount.save();
+
+}
 
 const rideDuration=calculateDuration(currentRide.date,new Date()).toFixed(2);    //calculating ride's duration
 const rideCost=(rideDuration*bike.rate/60).toFixed(2);                          //calculating ride's price
@@ -501,6 +516,8 @@ try {
   await Bike.findOneAndUpdate({_id:currentRide.bikeID},{$set:{stationName:currentRide.arrivalStation,state:"Available",locked:true,PIN:'XXXX'}});  //Updates ride's arrival station
 //Balance Transfer
   await Bank.findOneAndUpdate({bankAccountNumber:bankAccountNumber},{$inc:{balance:rideCost*-1}});  //withdraw ride's cost from the client's bankAccount
+  await Bank.findOneAndUpdate({name:"Beskleta"},{$inc:{balance:rideCost}});  //Deposit ride's cost to the Beskleta's bankAccount
+
   await Client.findOneAndUpdate({_id:client._id},{$set:{state:'Available'}});  //Updates ride's arrival station
   await Station.findOneAndUpdate({name:currentRide.departureStation},{$inc:{numberRides:1}});  //Updates ride's arrival station
 

@@ -4,8 +4,8 @@ const RideSchema = new mongoose.Schema({
         
     bikeID: String,
     rideNumber: Number,
-    price: mongoose.Decimal128,
-    duration: mongoose.Decimal128,
+    price: Number,
+    duration:Number,
     date: {
       type: Date,
       default: Date.now

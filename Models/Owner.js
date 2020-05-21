@@ -28,9 +28,8 @@ const OwnerSchema = new mongoose.Schema({
     firstName: String,
     lastName: String,
     birthDate: Date,
-    bankAccountNumber: {
-        type: String,field:'bankAccountNumber', ref: 'Bank'
-    }
+    bankAccountNumber: String,
+    Notifications:[]
 });
 OwnerSchema.pre('save', function (next) {
     const user = this

@@ -1,4 +1,5 @@
 const Owner = require("../Models/Owner");
+const Bank = require("../Models/Bank");
 const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
@@ -45,7 +46,8 @@ router.post("/", async (req, res) => {
     lastName: req.body.lastName,
     birthDate:req.body.birthDate,
     password:req.body.password,
-    phoneNumber:req.body.phoneNumber
+    phoneNumber:req.body.phoneNumber,
+    Notifications:[]
   });
   try{const result = await owner.save();
     res.send(result);}
@@ -83,8 +85,9 @@ const results= await bcrypt.compare(req.body.password,hash);
 
 
 router.post('/signup', async (req,res) => {
+  if(!req.body.SSN ||!req.body.email ||!req.body.userName ||!req.body.password ||!req.body.firstName ||!req.body.lastName ||!req.body.phoneNumber ||!req.body.birthDate ||!req.body.bankAccountNumber)
+  return res.status(400).send('BAD REQUEST');
 
-   console.log(req.body);
    //look for an Owner with the same name || SSN;
    const result = await Owner.find({$or:[{ SSN: req.body.SSN },{ email: req.body.email },{userName:req.body.userName}] });
 
@@ -92,6 +95,8 @@ router.post('/signup', async (req,res) => {
        console.log('already exists');
                   return res.status(400).send('Already  Exists');
    }
+   const bank=await Bank.findOne({bankAccountNumber:req.body.bankAccountNumber})
+   if(!bank) return res.status(400).send("Your Bank Account was not found");
    let owner = new Owner({
        SSN: req.body.SSN,
        email: req.body.email,
@@ -100,8 +105,9 @@ router.post('/signup', async (req,res) => {
        lastName:req.body.lastName  ,
        phoneNumber:req.body.phoneNumber,
        birthDate:req.body.birthDate,
-       userName:req.body.userName
-
+       userName:req.body.userName,
+       bankAccountNumber:req.body.bankAccountNumber,
+       Notifications:[]
    });
    try {
        owner = await owner.save();

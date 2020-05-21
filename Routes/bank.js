@@ -22,9 +22,6 @@ router.post('/addBankAccount',async (req,res)=>{
     const bankAccount= await Bank.findOne({email:req.body.email});
     if(bankAccount) return res.status(400).send("Email already in use");
     const now = new Date();
-    // const month=now.getMonth();
-    // const year=now.getFullYear()%100+3;
-    // console.log("year: "+year);
     const validityDate = date.addYears(now, 3);
 
     const newBankAccount = new Bank({
@@ -34,9 +31,6 @@ router.post('/addBankAccount',async (req,res)=>{
         name:req.body.name,
         balance:parseFloat(req.body.balance),
         cardValidityDate:validityDate
-
-
-
 
     });
 try {

@@ -23,6 +23,7 @@ const BankSchema = new mongoose.Schema({
         required:true
     },
     password: String,
+    address: String
     
 });
 BankSchema.pre('save', function (next) {
@@ -31,6 +32,15 @@ BankSchema.pre('save', function (next) {
     bcrypt.hash(user.PIN, 10, function (err, encrypted) {
         if (err) throw err;
         user.PIN = encrypted
+        next()
+    })
+})
+BankSchema.pre('save', function (next) {
+    const user = this
+
+    bcrypt.hash(user.password, 10, function (err, encrypted) {
+        if (err) throw err;
+        user.password = encrypted
         next()
     })
 })

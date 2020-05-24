@@ -1,5 +1,6 @@
 const Owner = require("../Models/Owner");
 const Bank = require("../Models/Bank");
+const Bike = require("../Models/Bike");
 const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
@@ -234,5 +235,21 @@ const temp =await Owner.findOne({userName:req.body.userName});
     console.log(newOwner);
     return res.status(200).send(newOwner);
   
+  });
+  router.post('/viewNotifications',async(req,res)=>{
+    if(!req.body.userName)  return res.status(400).send("BAD REQUEST");
+    const owner=await Owner.findOne({userName:req.body.userName});
+    if(!owner) return res.status(404).send("Owner is not found");
+    return res.status(200).send(owner.Notifications);
+  });
+  router.post('/viewBikesStatistics',async(req,res)=>{
+    if(!req.body.userName)  return res.status(400).send("BAD REQUEST");
+    const owner=await Owner.findOne({userName:req.body.userName});
+    if(!owner) return res.status(404).send("Owner is not found");
+
+    const bikes= await Bike.find({ownerSSN:owner.SSN});
+    if(bikes.length===0)  return res.status(401).send("No bikes were found for this owner");
+    return res.status(200).send(bikes);
+
   });
 module.exports = router;

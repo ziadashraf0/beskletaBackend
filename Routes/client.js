@@ -566,7 +566,27 @@ await Client.updateOne({_id:client._id},{$set:{awaitingConfirmation:false}});
 
 return res.status(200).send("OK")
 
-})
+});
+router.post("/deleteNotification", async (req, res) => {
+  var ObjectId = require("mongodb").ObjectID;
+
+  if (!req.body.userName || !req.body.notificationID)
+    return res.status(404).send("BAD REQUEST");
+  const client = await Client.findOne({ userName: req.body.userName });
+  if (!client) return res.status(404).send("Client was not found");
+  const notifications = await Client.updateOne(
+    { _id: client._id },
+    {
+      $pull: { Notifications: { _id: ObjectId(req.body.notificationID) } }
+    }
+  );
+  if (notifications.nModified != 0) {
+    return res.status(200).send(notifications);
+  } else {
+    return res.status(404).send("cannot delete");
+  }
+});
+
 module.exports = router;
 function calculateDuration(startDate,endDate)
 {

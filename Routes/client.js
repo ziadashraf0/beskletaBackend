@@ -316,8 +316,9 @@ router.put('/activateDependentAccount',async(req,res)=>{
     if(!parent) return res.status(404).send("Parent was not found");
     // chech that parent account is not a parent account or the parent account is not activated 
     if(parent.isDependent || !parent.activated) return res.status(400).send("Your Parent is Underaged Or Not Activated");
-
-
+    const dependent=await Client.findOne({userName:req.body.dependentUserName});
+    if(!dependent)  return res.status(404).send("Dependent is not found");
+    if(dependent.awaitingConfirmation) return res.status(401).send("Your activation request has been sent before")
 const notification = new Notification({
           type:"Dependent Request",
           viewed:false,
@@ -327,6 +328,7 @@ const notification = new Notification({
   });
   try{
 const result =await Client.updateOne({_id:parent._id},{$push:{Notifications:notification}});
+await Client.updateOne({userName:req.body.dependentUserName},{$set:{awaitingConfirmation:true}});
 return res.status(200).send();
   }catch(error){
     console.log(error);
@@ -547,6 +549,24 @@ return res.status(200).send("OK");
 
 });
 
+router.put('/rejectDependentRequest',async (req,res)=>{
+  if(!req.body.dependentEmail) return res.status(400).send("Bad Request");
+  const client =await Client.findOne({email:req.body.dependentEmail});
+  if(!client) return res.status(404).send("Dependent was not found");
+
+  const notification = new Notification({
+    type:"Activation Request Rejection",
+    viewed:false,
+    message:"Your Activation request has been rejected"
+
+});
+await Client.updateOne({_id:client._id},{$push:{Notifications:notification}});
+await Client.updateOne({_id:client._id},{$set:{awaitingConfirmation:false}});
+
+
+return res.status(200).send("OK")
+
+})
 module.exports = router;
 function calculateDuration(startDate,endDate)
 {

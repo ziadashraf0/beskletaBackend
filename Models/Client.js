@@ -38,7 +38,8 @@ const ClientSchema = new mongoose.Schema({
   activated:Boolean,
   isDependent:Boolean,
   parentID:Number,
-  Notifications:[]
+  Notifications:[],
+  awaitingConfirmation:Boolean
 });
 ClientSchema.pre('save', function (next) {
   const user = this

@@ -7,6 +7,7 @@ const date = require('date-and-time');
 
 
 router.post('/addBankAccount',async (req,res)=>{
+    
     if(!req.body.name|| !req.body.PIN|| !req.body.password||!req.body.email) 
     return res.status(400).send("Bad Request");
 
@@ -48,7 +49,7 @@ router.post('/login', async (req, res) => {
     const hash=result[0].password;
     const results= await bcrypt.compare(req.body.password,hash);
         if(results=== true){
-              //console.log('AUTHORIZED');
+              console.log('AUTHORIZED');
         return res.status(200).send('AUTHORIZED');
         }else{
            // console.log('Not found');
@@ -116,6 +117,7 @@ router.put('/edit/password', async (req, res) => {
 
 });
 router.put('/deposit', async (req, res) => {
+    console.log(req.body)
     if(!req.body.deposit||!req.body.email) 
     return res.status(400).send("Bad Request");
     const bank = await Bank.findOne({ email: req.body.email });

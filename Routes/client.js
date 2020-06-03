@@ -6,7 +6,7 @@ const bcrypt=require('bcryptjs');
 const Bank = require("../Models/Bank");
 const Bike = require("../Models/Bike");
 const Station = require("../Models/Station");
-
+const PromoCode = require("../Models/PromoCode");
 const Ride = require("../Models/Ride");
 const Notification = require("../Models/Notification");
 const date = require('date-and-time');
@@ -482,8 +482,22 @@ const currentRide =await Ride.findOne({clientUserName:req.body.userName,isTermin
 if(!currentRide) return res.status(404).send("Your current ride was not found");
 const bike=await Bike.findOne({_id:currentRide.bikeID});        //finding bike
 if(!bike) return res.status(404).send("bike was not found");
-const client =await Client.findOne({userName:req.body.userName});     //finding client
+let client =await Client.findOne({userName:req.body.userName});     //finding client
+
 if(!client) return res.status(404).send("Client was not found");
+
+let discount=0;
+if(client.promoCode) {
+       if(isPromoCodeValid(client.promoCode)){
+               let clientPromoCode=client.promoCode;
+                  discount=client.promoCode.discountPercentage/100;
+                  clientPromoCode.numberOfRidesAvailable=clientPromoCode.numberOfRidesAvailable-1;
+                  console.log(clientPromoCode);
+                  await Client.findByIdAndUpdate({_id:client._id},{$set:{promoCode:clientPromoCode}});
+                }
+    }
+
+console.log(discount)
 var bankAccountNumber;
 if(client.isDependent){
   const parent=await Client.findOne({_id:client.parentID});
@@ -510,7 +524,7 @@ if(!beskletaBankAccount){
 }
 
 const rideDuration=calculateDuration(currentRide.date,new Date()).toFixed(2);    //calculating ride's duration
-const rideCost=(rideDuration*bike.rate/60).toFixed(2);                          //calculating ride's price
+const rideCost=(rideDuration*bike.rate/60*(1-discount)).toFixed(2);                          //calculating ride's price
 console.log(bankAccountNumber)
 try {
   await Ride.findOneAndUpdate({_id:currentRide._id},{$set:{duration:rideDuration,isTerminated:true,price:rideCost}});  //Updates ride's duration
@@ -541,10 +555,6 @@ return res.status(200).send("OK");
   return res.status(400).send("Error");
 
 }
-
-
-
-
 
 
 });
@@ -586,7 +596,35 @@ router.post("/deleteNotification", async (req, res) => {
     return res.status(404).send("cannot delete");
   }
 });
+//Rating Last Terminated Ride
+router.put('/rateRide',async(req,res)=>{
+      if(!req.body.rating ||!req.body.userName) return res.status(400).send("BAD REQUEST");
+      const rides=await Ride.find({clientUserName:req.body.userName,isTerminated:true}).sort({rideNumber:1});
+      if(rides.length===0)  return res.status(404).send("No rides were found");
+      if(req.body.rating>5|| req.body.rating<0) return res.status(401).send("Rating value is out of range");
+    await Ride.findByIdAndUpdate({_id:rides[rides.length-1]._id},{$set:{rating:req.body.rating}});
+    return res.send("OK");
+  });   
+router.put('/activatePromoCode',async(req,res)=>{
+      if(!req.body.userName ||!req.body.promoCode)   return res.status(400).send("BAD REQUEST");
+       const promoCode=await PromoCode.findOne({code:req.body.promoCode});
+       if(!promoCode) return res.status(404).send("Incorrect code or promo code is not valid any more");
+       if(!isPromoCodeValid(promoCode))  return res.status(401).send("Promo code is not valid any more");
 
+       let newPromoCode = new PromoCode({
+        description:"Use this PromoCode: "+promoCode.code+" to get a Discount: "+promoCode.discountPercentage +"% " +" for the next "+promoCode.numberOfRidesAvailable +" Rides "+"Valid to: "+date.format(promoCode.validityDate,"DD/MM/YYYY"),
+        code:promoCode.code,
+        numberOfRidesAvailable:promoCode.numberOfRidesAvailable,
+        discountPercentage:promoCode.discountPercentage,
+        validityDate:promoCode.validityDate
+        
+        });
+       await Client.findOneAndUpdate({userName:req.body.userName},{$set:{promoCode:newPromoCode}});
+      
+       return res.send("OK")
+
+
+});
 module.exports = router;
 function calculateDuration(startDate,endDate)
 {
@@ -596,4 +634,12 @@ function calculateDuration(startDate,endDate)
    var duration = moment.duration(end_date.diff(start_date));
    var minutes = duration.asMinutes();       
    return minutes;
+}
+function isPromoCodeValid(promoCode)
+{
+  let now=new Date()
+
+    if(now.getTime()<promoCode.validityDate.getTime() && promoCode.numberOfRidesAvailable>0)
+        return true  ;
+        return false;
 }

@@ -247,7 +247,7 @@ const temp =await Owner.findOne({userName:req.body.userName});
     const owner=await Owner.findOne({userName:req.body.userName});
     if(!owner) return res.status(404).send("Owner is not found");
 
-    const bikes= await Bike.find({ownerSSN:owner.SSN});
+    const bikes= await Bike.find({ownerSSN:owner.SSN}).select({numberOfRides:1,state:1});
     if(bikes.length===0)  return res.status(401).send("No bikes were found for this owner");
     return res.status(200).send(bikes);
 

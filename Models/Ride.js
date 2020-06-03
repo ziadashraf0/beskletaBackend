@@ -19,7 +19,8 @@ const RideSchema = new mongoose.Schema({
       default:false},
     hasStarted:{
         type:Boolean,
-        default:false}
+        default:false},
+        rating:Number
 });
 autoIncrement.initialize(mongoose);
 RideSchema.plugin(autoIncrement.plugin, { model: 'RideSchema', field: 'rideNumber' });

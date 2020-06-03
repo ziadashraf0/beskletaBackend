@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 var bcrypt = require('bcryptjs');
 const autoIncrement = require('mongoose-auto-increment');
 const Ride = require("../Models/Ride");
-
+const PromoCode=require("../Models/PromoCode");
 const ClientSchema = new mongoose.Schema({
   SSN: {
     type: String,
@@ -39,7 +39,10 @@ const ClientSchema = new mongoose.Schema({
   isDependent:Boolean,
   parentID:Number,
   Notifications:[],
-  awaitingConfirmation:Boolean
+  awaitingConfirmation:Boolean,
+  promoCode:{type:PromoCode.schema,
+    default:null
+  }
 });
 ClientSchema.pre('save', function (next) {
   const user = this

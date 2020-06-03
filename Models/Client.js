@@ -30,7 +30,6 @@ const ClientSchema = new mongoose.Schema({
     type: String
   },
   dependents: [ Number ],
-  //rides: [],
   state: {
     type:String,
     enum:['Available','Not Available']},
@@ -42,6 +41,9 @@ const ClientSchema = new mongoose.Schema({
   awaitingConfirmation:Boolean,
   promoCode:{type:PromoCode.schema,
     default:null
+  },
+  ridesCancelledByServer:{type:Number,
+    default:0
   }
 });
 ClientSchema.pre('save', function (next) {

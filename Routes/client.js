@@ -4,6 +4,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt=require('bcryptjs');
 const Bank = require("../Models/Bank");
+const Admin = require("../Models/Admin");
 const Bike = require("../Models/Bike");
 const Station = require("../Models/Station");
 const PromoCode = require("../Models/PromoCode");
@@ -623,6 +624,50 @@ router.put('/activatePromoCode',async(req,res)=>{
       
        return res.send("OK")
 
+
+});
+router.put('/cancelRideRequest',async(req,res)=>{
+      if(!req.body.userName) return res.status(400).send("BAD REQUEST");
+      const ride=await Ride.findOne({clientUserName:req.body.userName,hasStarted:false});
+      if(!ride) return res.status(400).send("NO rides requested found to cancel");
+      await Client.findOneAndUpdate({userName:req.body.userName},{$set:{state:'Available'}});
+      await Bike.findByIdAndUpdate({_id:ride.bikeID},{$set:{state:'Available',PIN:'XXXX'}});
+      await Station.findOneAndUpdate({name:ride.departureStation},{$inc:{numberBikes:1}});
+      await Ride.findOneAndDelete({_id:ride._id});
+
+      const notification = new Notification({
+        type:"Ride Cancelled",
+        viewed:false,
+        message:"Your ride has been cancelled"
+    
+    });
+
+          
+    await Client.updateOne({userName:req.body.userName},{$push:{Notifications:notification}});
+
+
+return res.send("OK");
+});
+
+router.post('/reportProblem',async(req,res)=>{
+        if(!req.body.report) return res.status(400).send("BAD REQUEST");
+      const admins=await Admin.find();
+      if(admins.length===0)  res.status(404).send("Admins are not found");
+      
+      const report = new Notification({
+        type:"Report",
+        viewed:false,
+        message:req.body.report
+    
+    });
+
+          
+
+      for (let index = 0; index < admins.length; index++) {
+
+        await Admin.findOneAndUpdate({_id:admins[index]._id},{$push:{reports:report}});
+      }
+      return res.send(report);
 
 });
 module.exports = router;

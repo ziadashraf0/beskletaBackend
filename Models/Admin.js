@@ -29,7 +29,8 @@ const AdminSchema = new mongoose.Schema({
         unique: true
     },
     
-    birthDate: Date
+    birthDate: Date,
+    reports:[]
 
 });
 AdminSchema.pre('save', function (next) {

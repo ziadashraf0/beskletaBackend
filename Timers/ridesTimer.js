@@ -40,6 +40,8 @@ const timeoutObj = setTimeout(() => {
                    await Station.updateOne({name:rides[index].departureStation},{$inc:{numberBikes:1}});
                    //Sending a notification to the client to let him know the ride is cancelled
                    await Client.findOneAndUpdate({userName:rides[index].clientUserName},{$push:{Notifications:notification}});
+                   //Incrementing number of rides cancelled by the server
+                   await Client.findOneAndUpdate({userName:rides[index].clientUserName},{$inc:{ridesCancelledByServer:1}});
                     //Deleting the ride from the DataBase
                    await Ride.findByIdAndDelete({_id:rides[index]._id});                   
 

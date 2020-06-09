@@ -44,7 +44,7 @@ router.post('/addStation',async (req,res)=>{
 });
 
 
-router.post("/removeStation", async (req, res) => {
+router.post("/editStation/removeStation", async (req, res) => {
     console.log(req.body);
     result = await Station.findOneAndDelete({name : req.body.name });
   
@@ -56,32 +56,36 @@ router.post("/removeStation", async (req, res) => {
     return res.status(200).send(result);
   });
 
-  router.put('/edit/stationName', async (req, res) => {
+  router.post('/editStation/stationName', async (req, res) => {
 
     const station = await Station.findOne({ name: req.body.name });
     if (!station) {
         console.log('sss');
 
-        return res.status(404).send('Not found');
+        return res.status(404).send('Not found da elrouter');
     }
-    if (req.body.name) {
-        
+    if (req.body.newName) {
+        let results = await Station.find({ name: req.body.newName });
+        if (results.length>0) {
 
-        await Station.updateOne({ _id: station._id }, { $set: { name: req.body.name } });
+   
+            return res.status(400).send('Name already taken');
+        }
+        console.log(results);
+
+        await Station.updateOne({ _id: station._id }, { $set: { name: req.body.newName } });
 
     }
-
-    const newstation = await Station.findOne({ name: req.body.name });
+    const newstation = await Station.findOne({ name: req.body.newName });
     res.status(200).send(newstation);
 
 });
-router.put('/edit/stationCapacity', async (req, res) => {
-
+router.post("/editStation/stationCapacity", async (req, res) => {
     const station = await Station.findOne({ name: req.body.name });
     if (!station) {
         console.log('sss');
 
-        return res.status(404).send('Not found');
+        return res.status(404).send('Not found yahbal');
     }
     if (req.body.maxCapacity) {
         

@@ -247,9 +247,28 @@ const temp =await Owner.findOne({userName:req.body.userName});
     const owner=await Owner.findOne({userName:req.body.userName});
     if(!owner) return res.status(404).send("Owner is not found");
 
-    const bikes= await Bike.find({ownerSSN:owner.SSN}).select({numberOfRides:1,state:1});
+    const bikes= await Bike.find({ownerSSN:owner.SSN}).select({PIN:0});
     if(bikes.length===0)  return res.status(401).send("No bikes were found for this owner");
     return res.status(200).send(bikes);
 
+  });
+  router.post("/deleteNotification", async (req, res) => {
+    var ObjectId = require("mongodb").ObjectID;
+  
+    if (!req.body.userName || !req.body.notificationID)
+      return res.status(404).send("BAD REQUEST");
+    const owner = await Owner.findOne({ userName: req.body.userName });
+    if (!owner) return res.status(404).send("Owner was not found");
+    const notifications = await Owner.updateOne(
+      { _id: owner._id },
+      {
+        $pull: { Notifications: { _id: ObjectId(req.body.notificationID) } }
+      }
+    );
+    if (notifications.nModified != 0) {
+      return res.status(200).send(notifications);
+    } else {
+      return res.status(404).send("cannot delete");
+    }
   });
 module.exports = router;

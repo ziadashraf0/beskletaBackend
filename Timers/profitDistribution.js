@@ -41,7 +41,7 @@ const timeoutObj = setTimeout(() => {
                      for(let j=0;j<rides.length;j++){
                             if(parseInt(rides[j].bikeID)===parseInt( bikes[i]._id))
                                 {
-                                    variableCost+=rides[j].price*0.2;        //calculating the Variable cost= 20% from each ride
+                                    variableCost+=rides[j].price*0.1;        //calculating the Variable cost= 10% from each ride
                                 }
                      }
 
